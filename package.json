@@ -1,0 +1,25 @@
+{
+  "name": "@godalming123/signals",
+  "descrition": "TODO: Fast push-based type-safe signals library for browsers, NodeJS, and bun.",
+  "version": "0.1.1",
+  "license": "BSD-3-Clause",
+  "main": "./build/signals.js",
+  "types": "./build/signals.d.ts",
+  "scripts": {
+    "check": "bun x tsc --noEmit; bun test",
+    "build": "bun x tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "files": [
+    "./license.md",
+    "./package.json",
+    "./readme.md",
+    "./build/signals.js",
+    "./build/signals.d.ts"
+  ]
+}
