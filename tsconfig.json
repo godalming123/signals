@@ -1,4 +1,5 @@
 {
+	// TODO: Find a way to type check ./signals.spec.ts without emitting it
 	"compilerOptions": {
 		"allowJs": false,
 		"forceConsistentCasingInFileNames": true,

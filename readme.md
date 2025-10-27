@@ -28,10 +28,22 @@ To install dependencies:
 bun install
 ```
 
-To test:
+To type check:
 
 ```sh
 bun run check
+```
+
+To test:
+
+```sh
+bun run test
+```
+
+To debug:
+
+```sh
+bun run debug
 ```
 
 To publish to NPM:
