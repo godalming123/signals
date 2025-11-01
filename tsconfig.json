@@ -1,14 +1,22 @@
 {
-	// TODO: Find a way to type check ./signals.spec.ts without emitting it
-	"compilerOptions": {
-		"allowJs": false,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": false,
-		"strict": true,
-		"target": "es2022",
-		"moduleResolution": "bundler",
-		"declaration": true,
-		"outDir": "./build",
-	},
+  // TODO: Find a way to type check ./signals.spec.ts without emitting it
+  "compilerOptions": {
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": false,
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "outDir": "./build",
+
+    // Strictness settings
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": true
+  },
 }
