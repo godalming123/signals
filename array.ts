@@ -96,31 +96,37 @@ export class ArrayStateClass<T> implements MutableArray<T> {
     (this.value as Immutable<T>[])[index] = newValue
     this.changes.update(val => val.changes.push({type: ChangeType.Replace, index, newValue}))
   }
-  move(_oldIndex: number, _newIndex: number): void {
+  move(oldIndex: number, newIndex: number): void {
+    if (oldIndex < 0 || oldIndex > this.value.length-1) throw new Error(`old index (${oldIndex}) must be in the range 0-${this.value.length-1} inclusive`)
+    if (newIndex < 0 || newIndex > this.value.length-1) throw new Error(`new index (${newIndex}) must be in the range 0-${this.value.length-1} inclusive`)
     if (this.changes.hasChangedWhileUpdatingState === false)
       this.changes.value = {changes: [], newLength: this.value.length}
-    throw new Error("TODO: Implement move")
+    this.changes.update(val => val.changes.push({type: ChangeType.Move, oldIndex, newIndex}))
+    const [value] = (this.value as Immutable<T>[]).splice(oldIndex, 1)
+    if (value === undefined) throw new Error("Unreachable");
+    (this.value as Immutable<T>[]).splice(newIndex, 0, value)
   }
   map<Out>(func: (elem: Immutable<T>) => Out /* does not use `Immutable` because that causes typescript to incorrectly inferr the types */): DerivedArray<Out> {
     return map(this.value, this.changes, func)
   }
 }
 
-export function updateArrayFromChanges<T>(array: Immutable<T>[], changes: Changes<T>) {
-  changes.changes.forEach(change => {
-    switch (change.type) {
-      case ChangeType.Delete:
-        array.splice(change.startIndex, change.length)
-        break
-      case ChangeType.Insert:
-        array.splice(change.index, 0, ...change.values)
-        break
-      case ChangeType.Move:
-        throw new Error("TODO: Implement move")
-      case ChangeType.Replace:
-        array[change.index] = change.newValue
-    }
-  })
+export function updateArrayFromChange<T>(array: Immutable<T>[], change: Change<T>) {
+  switch (change.type) {
+    case ChangeType.Delete:
+      array.splice(change.startIndex, change.length)
+      break
+    case ChangeType.Insert:
+      array.splice(change.index, 0, ...change.values)
+      break
+    case ChangeType.Move:
+      const [value] = array.splice(change.oldIndex, 1)
+      if (value === undefined) throw new Error("Unreachable")
+      array.splice(change.newIndex, 0, value)
+      break
+    case ChangeType.Replace:
+      array[change.index] = change.newValue
+  }
 }
 
 export function map<In, Out>(inValue: Immutable<In[]>, inChanges: Signal<Changes<In>>, func: (elem: Immutable<In>) => Immutable<Out>): DerivedArray<Out> {
@@ -136,7 +142,7 @@ export function map<In, Out>(inValue: Immutable<In[]>, inChanges: Signal<Changes
       }),
       newLength: inChanges.value.newLength,
     }
-    updateArrayFromChanges(value, out)
+    for (const change of out.changes) updateArrayFromChange(value, change)
     return out
   })
   return {
@@ -153,6 +159,7 @@ export function map<In, Out>(inValue: Immutable<In[]>, inChanges: Signal<Changes
       return value
     },
     map(func) {
+      // return arrayState([]) // for some reason this line fixes the "allows a derived array to be freed while the array(s) from which it is derived are still being used" test
       return map(value, derivedChanges, func)
     },
   }
@@ -206,7 +213,8 @@ export function join<T>(...parts: (
                 updates.push({...change, startIndex: index + change.startIndex})
                 break
               case ChangeType.Move:
-                throw new Error("TODO: Implement move")
+                updates.push({type: ChangeType.Move, oldIndex: change.oldIndex+index, newIndex: change.newIndex+index})
+                break
               case ChangeType.Replace:
                 updates.push({...change, index: index + change.index})
             }
@@ -224,7 +232,7 @@ export function join<T>(...parts: (
       }
     }
     const out = {changes: updates, newLength: index}
-    updateArrayFromChanges(value, out)
+    for (const change of out.changes) updateArrayFromChange(value, change)
     return out
   })
   return {

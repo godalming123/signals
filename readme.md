@@ -15,9 +15,9 @@ Push-based type-safe signals library for browsers, [NodeJS](https://nodejs.org/)
   - `zip` (several 1D array signals -> one 2D array signal)
   - `unzip` (one 2D array signal -> several 1D array signals)
 - Add support for using `spread` with a `Signal<unknown[]>`
+- Add support for a `range` function with the type signature `(start: number | Signal<number>, end: number | Signal<number>) => DerivedArray<number>`
 - Add an `index` argument to the `ImmutableArray`s `map` function
 - Setup a performance benchmark and optimize the code, including cleaning up the code
-- Implement moving elements in an array without recomputing the value of the element in the derived arrays
 - Detect circular dependencies, and cause an error when they occur
 - Do more testing
 - Setup eslint and prettier

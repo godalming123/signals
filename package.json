@@ -1,13 +1,13 @@
 {
   "name": "@godalming123/signals",
   "description": "Push-based type-safe signals library for browsers, NodeJS, and bun.",
-  "version": "0.2.2",
+  "version": "0.2.7",
   "license": "BSD-3-Clause",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
     "check": "bun x tsc --noEmit",
-    "test": "bun test signals.spec.ts --coverage",
+    "test": "bun test ./signals.spec.ts --coverage",
     "debug": "bun --inspect-brk test signals.spec.ts --coverage --timeout=0",
     "build": "rm -rf build; bun x tsc"
   },

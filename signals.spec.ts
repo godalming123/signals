@@ -91,10 +91,7 @@ t.describe("the core signals implementation", () => {
       return modulo.value * 2
     })
     effect(doubleModulo, _ => numberOfTimesThingsHaveRan.doubleModuloEffect += 1)
-    t.expect(numberOfTimesThingsHaveRan.doubled).toBe(1)
-    t.expect(numberOfTimesThingsHaveRan.modulo).toBe(1)
-    t.expect(numberOfTimesThingsHaveRan.doubleModulo).toBe(1)
-    t.expect(numberOfTimesThingsHaveRan.doubleModuloEffect).toBe(1)
+    t.expect(numberOfTimesThingsHaveRan).toEqual({doubled: 1, modulo: 1, doubleModulo: 1, doubleModuloEffect: 1})
     t.expect(count.value).toBe(1)
     t.expect(doubled.value).toBe(2)
     t.expect(modulo.value).toBe(1)
@@ -103,14 +100,22 @@ t.describe("the core signals implementation", () => {
       count.value += 2
       count.value += 2
     })
-    t.expect(numberOfTimesThingsHaveRan.doubled).toBe(2)
-    t.expect(numberOfTimesThingsHaveRan.modulo).toBe(2)
-    t.expect(numberOfTimesThingsHaveRan.doubleModulo).toBe(1)
-    t.expect(numberOfTimesThingsHaveRan.doubleModuloEffect).toBe(1)
+    t.expect(numberOfTimesThingsHaveRan).toEqual({doubled: 2, modulo: 2, doubleModulo: 1, doubleModuloEffect: 1})
     t.expect(count.value).toBe(5)
     t.expect(doubled.value).toBe(10)
     t.expect(modulo.value).toBe(1)
     t.expect(doubleModulo.value).toBe(2)
+  })
+  t.it("allows you to remove an effect", () => {
+    const count = state(2)
+    let lastCount = 0
+    const countEffect = effect(count, c => lastCount = c.value)
+    t.expect(lastCount).toBe(2)
+    t.expect(count.tracker.downstreamEffects.size).toBe(1)
+    updateState(() => count.value += 1)
+    t.expect(lastCount).toBe(3)
+    countEffect.remove()
+    t.expect(count.tracker.downstreamEffects.size).toBe(0)
   })
 })
 
@@ -128,8 +133,8 @@ t.describe("the array signals implementation", () => {
     t.expect(doubleModulo.value).toEqual([2, 4, 0, 2])
     t.expect(joined.value).toEqual([-2, 1, 2, 3, 4, 2, 4, 0, 2])
     updateState(() => {
-      array.append(5)
       array.delete(1)
+      array.append(5)
     })
     t.expect(computations).toBe(5)
     t.expect(array.value).toEqual([1, 3, 4, 5])
@@ -137,12 +142,12 @@ t.describe("the array signals implementation", () => {
     t.expect(joined.value).toEqual([-2, 1, 3, 4, 5, 2, 0, 2, 4])
     updateState(() => {
       array.append(10, 11)
-      array.delete(1)
+      array.move(4, 0)
     })
     t.expect(computations).toBe(7)
-    t.expect(array.value).toEqual([1, 4, 5, 10, 11])
-    t.expect(doubleModulo.value).toEqual([2, 2, 4, 2, 4])
-    t.expect(joined.value).toEqual([-2, 1, 4, 5, 10, 11, 2, 2, 4, 2, 4])
+    t.expect(array.value).toEqual([10, 1, 3, 4, 5, 11])
+    t.expect(doubleModulo.value).toEqual([2, 2, 0, 2, 4, 4])
+    t.expect(joined.value).toEqual([-2, 10, 1, 3, 4, 5, 11, 2, 2, 0, 2, 4, 4])
   })
   t.it("does not let you mutate an array state outside of an `updateState` call", () => {
     const array = arrayState([1, 2, 3])
